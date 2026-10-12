@@ -1,86 +1,149 @@
-/* Reset browser defaults */
+/* Reset */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Segoe UI', Arial, sans-serif;
 }
 
-/* Center the login container on the screen */
+/* App background */
 body {
+    min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    background: #ffffff;
+    padding: 20px;
+    background: linear-gradient(
+        145deg,
+        #f3edff 0%,
+        #f8f7fc 45%,
+        #ffffff 100%
+    );
 }
 
-/* Card layout wrapper */
+/* Main mobile app card */
 .login-container {
-    background-color: #ffffff;
-    padding: 2.5rem;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     width: 100%;
-    max-width: 400px;
+    max-width: 420px;
+    background: #ffffff;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(70, 45, 110, 0.12);
 }
 
-.login-form h2 {
-    color: #333333;
-    margin-bottom: 0.5rem;
-    font-size: 1.8rem;
+/* Purple app header */
+.app-header {
+    text-align: center;
+    padding: 38px 24px 42px;
+    color: #ffffff;
+    background: linear-gradient(
+        135deg,
+        #764ba2,
+        #667eea
+    );
+    border-radius: 0 0 35px 35px;
 }
 
-.login-form .subtitle {
-    color: #666666;
-    font-size: 0.9rem;
-    margin-bottom: 2rem;
+.app-logo {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 22px;
+    box-shadow: 0 8px 20px rgba(30, 20, 80, 0.12);
 }
 
-/* Form input styling */
+.app-logo span {
+    font-size: 38px;
+    color: #ffffff;
+}
+
+.app-header h1 {
+    font-size: 25px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 7px;
+}
+
+.app-header p {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Login form */
+.login-form {
+    padding: 35px 28px 28px;
+}
+
+.welcome-text {
+    margin-bottom: 30px;
+}
+
+.welcome-text h2 {
+    font-size: 27px;
+    color: #252238;
+    font-weight: 700;
+    margin-bottom: 9px;
+}
+
+.welcome-text p {
+    font-size: 14px;
+    color: #858397;
+}
+
+/* Input fields */
 .input-group {
-    margin-bottom: 1.5rem;
-    text-align: left;
+    margin-bottom: 22px;
 }
 
 .input-group label {
     display: block;
-    color: #444444;
-    font-size: 0.85rem;
+    color: #373449;
+    font-size: 13px;
     font-weight: 600;
-    margin-bottom: 0.5rem;
+    margin-bottom: 9px;
 }
 
 .input-group input {
     width: 100%;
-    padding: 0.75rem 1rem;
-    font-size: 0.95rem;
-    border: 1px solid #cccccc;
-    border-radius: 6px;
+    height: 54px;
+    padding: 0 16px;
+    background: #f8f7fc;
+    border: 1px solid #e9e6f1;
+    border-radius: 13px;
     outline: none;
-    transition: border-color 0.3s ease;
+    color: #29263a;
+    font-size: 14px;
+    transition: all 0.25s ease;
+}
+
+.input-group input::placeholder {
+    color: #aaa6b8;
 }
 
 .input-group input:focus {
+    background: #ffffff;
     border-color: #764ba2;
+    box-shadow: 0 0 0 4px rgba(118, 75, 162, 0.09);
 }
 
-/* Forgot password & remember me formatting */
+/* Forgot password */
 .form-actions {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.85rem;
-    margin-bottom: 2rem;
-}
-
-.remember-me {
-    color: #555555;
-    cursor: pointer;
+    justify-content: flex-end;
+    margin-top: -5px;
+    margin-bottom: 25px;
 }
 
 .forgot-pass {
     color: #764ba2;
+    font-size: 13px;
+    font-weight: 600;
     text-decoration: none;
 }
 
@@ -88,38 +151,90 @@ body {
     text-decoration: underline;
 }
 
-/* Submit Button */
+/* Login button */
 .login-btn {
     width: 100%;
-    padding: 0.85rem;
-    background-color: #764ba2;
+    height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    position: relative;
+    background: linear-gradient(
+        135deg,
+        #764ba2,
+        #667eea
+    );
     color: #ffffff;
     border: none;
-    border-radius: 6px;
-    font-size: 1rem;
+    border-radius: 14px;
+    font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    box-shadow: 0 8px 18px rgba(118, 75, 162, 0.22);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-btn .arrow {
+    font-size: 22px;
+    line-height: 1;
 }
 
 .login-btn:hover {
-    background-color: #5a377d;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(118, 75, 162, 0.28);
 }
 
-/* Link back to registration */
-.signup-link {
+.login-btn:active {
+    transform: scale(0.98);
+}
+
+/* Footer */
+.footer-text {
     text-align: center;
-    margin-top: 1.5rem;
-    font-size: 0.85rem;
-    color: #666666;
+    color: #aaa6b8;
+    font-size: 12px;
+    margin-top: 26px;
 }
 
-.signup-link a {
-    color: #764ba2;
-    text-decoration: none;
-    font-weight: 600;
-}
+/* Mobile screens */
+@media (max-width: 480px) {
+    body {
+        padding: 0;
+        align-items: stretch;
+        background: #ffffff;
+    }
 
-.signup-link a:hover {
-    text-decoration: underline;
+    .login-container {
+        max-width: none;
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .app-header {
+        padding: 48px 24px 42px;
+        border-radius: 0 0 35px 35px;
+    }
+
+    .login-form {
+        flex: 1;
+        padding: 38px 25px 30px;
+    }
+
+    .welcome-text h2 {
+        font-size: 28px;
+    }
+
+    .input-group input {
+        height: 56px;
+    }
+
+    .login-btn {
+        height: 56px;
+    }
 }
+```
