@@ -3,39 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Login Page</title>
-    <!-- Linking the separate CSS file -->
+
+    <title>Login | My App</title>
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="login-container">
+    <main class="login-container">
+
+        <div class="app-header">
+            <div class="app-logo">
+                <span>✦</span>
+            </div>
+
+            <h1>My App</h1>
+            <p>Your workspace, all in one place.</p>
+        </div>
+
         <form class="login-form" action="#" method="POST">
-            <h2>Welcome Back</h2>
-            <p class="subtitle">Please enter your details to sign in</p>
+
+            <div class="welcome-text">
+                <h2>Welcome Back!</h2>
+                <p>Please sign in to continue.</p>
+            </div>
 
             <div class="input-group">
                 <label for="username">Username or Email</label>
-                <input type="text" id="username" placeholder="Enter your username" required>
+
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Enter your username"
+                    autocomplete="username"
+                    required
+                >
             </div>
 
             <div class="input-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" placeholder="Enter your password" required>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required
+                >
             </div>
 
             <div class="form-actions">
-                <label class="remember-me">
-                    <input type="checkbox"> Remember me
-                </label>
-                <a href="#" class="forgot-pass">Forgot password?</a>
+                <a href="#" class="forgot-pass">
+                    Forgot password?
+                </a>
             </div>
 
-            <button type="submit" class="login-btn">Log In</button>
+            <button type="submit" class="login-btn">
+                Log In
+                <span class="arrow">→</span>
+            </button>
 
-            <p class="signup-link">Don't have an account? <a href="#">Sign up</a></p>
+            <p class="footer-text">
+                Secure access to your account
+            </p>
+
         </form>
-    </div>
+
+    </main>
 
 </body>
 </html>
+```
