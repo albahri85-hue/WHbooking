@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>إدارة حجوزات الاستراحة</title>
+
+<style>
+:root {
+  --purple: #6841a5;
+  --purple-dark: #4d2b80;
+  --purple-light: #f2ecfa;
+  --bg: #f6f5fa;
+  --text: #29253a;
+  --muted: #777386;
+  --border: #e8e4ef;
+  --green: #20865b;
+  --red: #c33c4a;
+  --orange: #b97716;
+  --blue: #3b82f6;
+  --blue-dark: #2563eb;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Tahoma, Arial, sans-serif;
+  font-size: 13px;
+}
+
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+
+.topbar {
+  background: linear-gradient(120deg, var(--purple-dark), var(--purple));
+  color: white;
+  padding: 13px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.topbar h1 { font-size: 19px; margin: 0; }
+.topbar small { display: block; opacity: .85; margin-top: 5px; }
+
+.container { max-width: 1450px; margin: auto; padding: 14px; }
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.toolbar-group { display: flex; gap: 7px; flex-wrap: wrap; }
+
+.btn {
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 7px;
+  font-size: 12px;
+}
+
+.btn-primary { background: var(--purple); color: white; border-color: var(--purple); }
+.btn-primary:hover { background: var(--purple-dark); }
+.btn-danger { color: var(--red); border-color: #f0c9ce; }
+.btn-small { padding: 4px 7px; font-size: 11px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  margin-bottom: 13px;
+}
+
+.stat {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 11px 13px;
+}
+
+.stat-label { color: var(--muted); font-size: 11px; }
+.stat-value { font-size: 22px; font-weight: bold; margin-top: 6px; color: var(--purple-dark); }
+
+.panel {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 13px;
+  min-width: 0;
+}
+
+.panel-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.panel-heading h2 { font-size: 14px; margin: 0; }
+
+.tabs { display: flex; gap: 5px; }
+
+.tab {
+  background: #f4f1f8;
+  border: 0;
+  border-radius: 6px;
+  padding: 7px 11px;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.tab.active { background: var(--purple); color: white; }
+
+/* بطاقات الغرف */
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 9px;
+}
+
+.room-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 11px;
+  background: #fff;
+}
+
+.room-card h3 { font-size: 13px; margin: 0 0 7px; }
+.room-card p { color: var(--muted); margin: 5px 0; font-size: 11px; }
+
+.status {
+  display: inline-block;
+  border-radius: 20px;
+  padding: 3px 7px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.status-free { background: #e5f6ec; color: #187547; }
+.status-busy { background: #fff0dc; color: #995c08; }
+.status-other { background: #f0edf5; color: #6d6479; }
+
+/* ==========================================================
+   التقويم الشهري
+   ========================================================== */
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.month-year {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.nav-btn {
+  background: #f1f5f9;
+  border: none;
+  border-radius: 8px;
+  color: #64748b;
+  font-size: 1.1rem;
+  padding: 7px 14px;
+  transition: all .2s ease;
+}
+
+.nav-btn:hover { background: #e2e8f0; color: #0f172a; }
+
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  text-align: center;
+}
+
+.day-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  padding-bottom: 6px;
+}
+
+.day-name.header-fri { color: #ef4444; }
+.day-name.header-sat { color: var(--blue); }
+
+.day {
+  position: relative;
+  min-height: 82px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #334155;
+  padding: 5px 4px;
+  text-align: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: background .2s ease, border-color .2s ease;
+}
+
+.day.weekend { background: #f8fafc; }
+.day:not(.empty):hover { background: #f1f5f9; }
+.day.empty { cursor: default; background: transparent !important; }
+
+.day-num {
+  display: block;
+  font-size: .95rem;
+  font-weight: 500;
+}
+
+.day.past-day { color: #94a3b8; }
+.day.past-day .day-num { opacity: .6; }
+
+.day.today { background: var(--blue) !important; color: #fff; }
+.day.today:hover { background: var(--blue-dark) !important; }
+.day.today .day-num { font-weight: 700; }
+
+.day.selected { border-color: var(--purple); box-shadow: 0 0 0 2px var(--purple-light); }
+
+.day-chips { margin-top: 4px; display: flex; flex-direction: column; gap: 2px; }
+
+.day-chip {
+  display: block;
+  background: var(--purple-light);
+  color: #49306e;
+  border-right: 3px solid var(--purple);
+  border-radius: 3px;
+  font-size: 9px;
+  line-height: 1.4;
+  padding: 2px 4px;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.day.today .day-chip { background: rgba(255,255,255,.92); }
+
+.day-more { font-size: 9px; color: var(--muted); }
+.day.today .day-more { color: #fff; }
+
+.day-count {
+  display: none;
+  margin: 4px auto 0;
+  min-width: 18px;
+  height: 18px;
+  line-height: 18px;
+  border-radius: 9px;
+  background: var(--purple);
+  color: white;
+  font-size: 10px;
+  padding: 0 5px;
+}
+
+/* لوحة حجوزات اليوم المحدد */
+.day-panel {
+  margin-top: 14px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.day-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.day-panel-head h3 { margin: 0; font-size: 13px; }
+
+.day-booking {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-right: 4px solid var(--purple);
+  border-radius: 8px;
+  padding: 9px 11px;
+  margin-bottom: 7px;
+  background: #fff;
+}
+
+.day-booking .meta { color: var(--muted); font-size: 11px; margin-top: 3px; }
+
+/* جدول الحجوزات */
+.table-scroll { width: 100%; overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+
+th, td {
+  padding: 8px 9px;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+}
+
+th { background: #f7f4fb; color: #5b4b71; font-weight: bold; }
+tbody tr:hover { background: #fbf9fe; }
+
+.actions { display: flex; gap: 5px; }
+
+/* النوافذ */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(24, 17, 38, .55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  z-index: 1000;
+}
+
+.modal.open { display: flex; }
+
+.modal-content {
+  width: min(510px, 100%);
+  max-height: 92vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 12px;
+  padding: 17px;
+  box-shadow: 0 15px 50px #0002;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 13px;
+}
+
+.modal-header h2 { font-size: 16px; margin: 0; }
+
+.close-btn { border: 0; background: #f0edf5; border-radius: 6px; padding: 5px 9px; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+.field { min-width: 0; }
+.field.full { grid-column: 1 / -1; }
+
+.field label { display: block; font-size: 11px; margin-bottom: 5px; color: #625b70; }
+
+.field input, .field select, .field textarea {
+  width: 100%;
+  border: 1px solid #ded8e8;
+  border-radius: 6px;
+  padding: 9px;
+  background: white;
+  outline: none;
+  font-size: 12px;
+}
+
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--purple); }
+.field textarea { min-height: 60px; resize: vertical; }
+
+.shift-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+
+.shift-option {
+  border: 1px solid #ded8e8;
+  background: white;
+  border-radius: 6px;
+  padding: 8px 3px;
+  font-size: 11px;
+}
+
+.shift-option.active {
+  background: var(--purple-light);
+  border-color: var(--purple);
+  color: var(--purple-dark);
+  font-weight: bold;
+}
+
+.price-box {
+  padding: 10px;
+  background: var(--purple-light);
+  border-radius: 7px;
+  color: var(--purple-dark);
+  font-weight: bold;
+  text-align: center;
+}
+
+.form-actions { display: flex; gap: 7px; margin-top: 14px; }
+.form-actions button { flex: 1; }
+
+.message {
+  display: none;
+  padding: 10px;
+  border-radius: 7px;
+  margin-bottom: 10px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.message.show { display: block; }
+.message.error { background: #fff0f0; color: #a12532; }
+.message.success { background: #e9f8ef; color: #176a42; }
+
+.muted { color: var(--muted); }
+.hidden { display: none !important; }
+
+.loading { text-align: center; padding: 18px; color: var(--muted); }
+
+@media (max-width: 650px) {
+  .container { padding: 9px; }
+  .topbar { padding: 12px; }
+  .topbar h1 { font-size: 16px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat { padding: 9px; }
+  .stat-value { font-size: 19px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .field.full { grid-column: auto; }
+
+  .month-grid { gap: 3px; }
+  .day { min-height: 52px; padding: 4px 2px; }
+  .day-chips { display: none; }
+  .day-count { display: inline-block; }
+  .day.today .day-count { background: #fff; color: var(--blue-dark); }
+  .day-name { font-size: 9px; }
+}
+
+/* قائمة اختيار الوقت المخصصة */
+.time-picker { position: relative; width: 100%; }
+
+.time-picker-button {
+  width: 100%;
+  padding: 7px 9px;
+  min-height: 34px;
+  border: 1px solid #ded8e8;
+  border-radius: 6px;
+  background: white;
+  color: var(--text);
+  text-align: right;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.time-picker-button:hover { border-color: var(--purple); }
+
+.time-picker-options {
+  display: none;
+  position: absolute;
+  top: calc(100% + 3px);
+  right: 0;
+  width: 155px;
+  max-height: 190px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  box-shadow: 0 5px 15px #0002;
+  z-index: 1100;
+  padding: 4px;
+}
+
+.time-picker-options.open { display: block; }
+
+.time-option {
+  display: block;
+  width: 100%;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 4px;
+  background: white;
+  color: var(--text);
+  text-align: right;
+  font-family: Tahoma, Arial, sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.time-option:hover { background: var(--purple-light); }
+.time-option.selected { background: var(--purple); color: white; }
+.time-picker + small { display: block; margin-top: 4px; }
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+  <div>
+    <h1>إدارة حجوزات الاستراحة</h1>
+    <small>إدارة الغرف والحجوزات اليومية</small>
+  </div>
+  <div class="toolbar-group">
+
+
+   <button class="btn btn-primary" type="button" onclick="window.location.href='index.html'">خروج </button>
+    <button class="btn hidden" id="refreshBtn">↻ تحديث البيانات</button>
+    <button class="btn btn-primary hidden" id="newBookingBtn">＋ حجز جديد</button>
+  </div>
+</header>
+
+<main class="container">
+
+  <div id="pageMessage" class="message"></div>
+
+  <div class="toolbar">
+    <div class="toolbar-group">
+      <button class="btn" id="todayBtn">اليوم</button>
+    </div>
+    <div class="muted" id="lastUpdated">جارٍ تحميل البيانات...</div>
+  </div>
+
+  <section class="stats">
+    <div class="stat">
+      <div class="stat-label">إجمالي الغرف</div>
+      <div class="stat-value" id="roomsCount">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">حجوزات اليوم</div>
+      <div class="stat-value" id="todayCount">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">الغرف المشغولة الآن</div>
+      <div class="stat-value" id="busyCount">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">الحجوزات القادمة</div>
+      <div class="stat-value" id="upcomingCount">0</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-heading">
+      <h2>الغرف</h2>
+      <span class="muted">حالة الغرف والحجوزات الحالية</span>
+    </div>
+    <div class="rooms-grid" id="roomsGrid">
+      <div class="loading">جارٍ تحميل الغرف...</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-heading">
+      <h2>جدول الحجوزات</h2>
+      <div class="tabs">
+        <button class="tab active" id="calendarTab">التقويم</button>
+        <button class="tab" id="listTab">قائمة الحجوزات</button>
+      </div>
+    </div>
+
+    <div id="calendarView">
+      <div class="month-nav">
+        <button class="nav-btn" id="prevMonthBtn" aria-label="الشهر السابق">&lt;</button>
+        <h2 class="month-year" id="monthYear"></h2>
+        <button class="nav-btn" id="nextMonthBtn" aria-label="الشهر التالي">&gt;</button>
+      </div>
+
+      <div class="month-grid" id="calendarGrid"></div>
+
+      <div class="muted" style="font-size:10px;margin-top:8px">
+        اضغط على أي يوم لعرض حجوزاته.
+      </div>
+
+      <div class="day-panel hidden" id="dayPanel">
+        <div class="day-panel-head">
+          <h3 id="dayPanelTitle"></h3>
+          <button class="btn btn-primary btn-small" id="dayNewBookingBtn">＋ حجز في هذا اليوم</button>
+        </div>
+        <div id="dayPanelList"></div>
+      </div>
+    </div>
+
+    <div id="listView" class="hidden">
+      <div class="toolbar">
+        <input id="searchBookings" class="btn"
+          placeholder="ابحث باسم الضيف أو الهاتف أو الغرفة..."
+          style="min-width:min(300px,100%)">
+        <select id="statusFilter" class="btn">
+          <option value="">جميع الحالات</option>
+          <option value="confirmed">مؤكد</option>
+          <option value="pending">قيد الانتظار</option>
+          <option value="cancelled">ملغي</option>
+        </select>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>الضيف</th>
+              <th>الهاتف</th>
+              <th>الغرفة</th>
+              <th>التاريخ</th>
+              <th>الفترة</th>
+              <th>المبلغ</th>
+              <th>الحالة</th>
+              <th>الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="bookingsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- نافذة إضافة / تعديل الحجز -->
+<div class="modal" id="bookingModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalTitle">حجز جديد</h2>
+      <button class="close-btn" id="closeModalBtn">✕</button>
+    </div>
+
+    <div id="modalMessage" class="message"></div>
+
+    <form id="bookingForm">
+      <input type="hidden" id="originalRoomId">
+      <input type="hidden" id="originalCreatedAt">
+
+      <div class="form-grid">
+
+        <div class="field">
+          <label for="guestName">اسم الضيف *</label>
+          <input id="guestName" required maxlength="150">
+        </div>
+
+        <div class="field">
+          <label for="guestPhone">رقم الهاتف *</label>
+          <input id="guestPhone" required maxlength="30" inputmode="tel">
+        </div>
+
+        <div class="field">
+          <label for="bookingDate">تاريخ الحجز *</label>
+          <input id="bookingDate" type="date" required>
+        </div>
+
+        <div class="field">
+          <label for="roomSelect">الغرفة *</label>
+          <select id="roomSelect" required></select>
+          <small id="roomEditNote" class="muted hidden">
+            لا يمكن تغيير الغرفة أثناء تعديل الحجز؛ حفاظاً على معرّف الحجز.
+          </small>
+        </div>
+
+        <div class="field full">
+          <label>فترة الحجز</label>
+          <div class="shift-options">
+            <button type="button" class="shift-option active" data-shift="full">يوم كامل</button>
+            <button type="button" class="shift-option" data-shift="h1">الفترة الأولى</button>
+            <button type="button" class="shift-option" data-shift="h2">الفترة الثانية</button>
+            <button type="button" class="shift-option" data-shift="custom">مبيت</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="startTimeButton">وقت البداية *</label>
+          <div class="time-picker">
+            <input type="hidden" id="startTime" required>
+            <button type="button" class="time-picker-button" id="startTimeButton">اختر الوقت</button>
+            <div class="time-picker-options" id="startTimeOptions"></div>
+          </div>
+          <small id="startTimeArabic" class="muted"></small>
+        </div>
+
+        <div class="field">
+          <label for="endTimeButton">وقت النهاية *</label>
+          <div class="time-picker">
+            <input type="hidden" id="endTime" required>
+            <button type="button" class="time-picker-button" id="endTimeButton">اختر الوقت</button>
+            <div class="time-picker-options" id="endTimeOptions"></div>
+          </div>
+          <small id="endTimeArabic" class="muted"></small>
+        </div>
+
+        <div class="field">
+          <label for="bookingPrice">المبلغ (ر.ع) *</label>
+          <input id="bookingPrice" type="number" min="0" step="0.001" required>
+          <div class="muted" style="font-size:10px;margin-top:4px">
+            يمكن تعديل السعر قبل الحفظ.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="bookingStatus">حالة الحجز</label>
+          <select id="bookingStatus">
+            <option value="confirmed">مؤكد</option>
+            <option value="pending">قيد الانتظار</option>
+            <option value="cancelled">ملغي</option>
+          </select>
+        </div>
+
+        <div class="field full">
+          <label for="bookingRemarks">ملاحظات</label>
+          <textarea id="bookingRemarks" maxlength="1000"></textarea>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="saveBtn">حفظ الحجز</button>
+        <button type="button" class="btn" id="cancelModalBtn">إلغاء</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+/* ==========================================================
+   إعداد الاتصال
+   يستخدم رمز الدخول المحفوظ من صفحة تسجيل الدخول الحالية.
+   ========================================================== */
+
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbyhY5DrU7M9OqPUleO7BlOG2n_8UagOu0-UGzjTGPqKsjEXY63az8GHduGjfQc0NpmmKQ/exec";
+
+let rooms = [];
+let bookings = [];
+let currentShift = "full";
+let editingBooking = null;
+let calendarDate = new Date();          // الشهر المعروض
+let selectedDay = dateString(new Date()); // اليوم المحدد في التقويم
+let saving = false;
+
+const $ = id => document.getElementById(id);
+
+const monthNames = [
+  "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+  "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
+];
+
+// من الأحد إلى السبت
+const dayNames = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+
+function getToken() {
+  return sessionStorage.getItem("token") || "";
+}
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[ch]);
+}
+
+function normalizeId(value) {
+  return String(value ?? "").trim();
+}
+
+function dateString(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+/* ---- معالجة التواريخ القادمة من Google Sheets بتوقيت UTC ---- */
+const SHEET_TZ = "Asia/Muscat";
+
+function isZonedIso(str) {
+  return /^\d{4}-\d{2}-\d{2}T[\d:.]+(Z|[+-]\d{2}:?\d{2})$/.test(str);
+}
+
+function zonedParts(str) {
+  const d = new Date(str);
+  if (Number.isNaN(d.getTime())) return null;
+
+  // خلايا الوقت فقط تأتي بتاريخ 1899 مع فرق التوقيت القديم لمسقط (+03:41:12)
+  if (d.getUTCFullYear() < 1900) {
+    const t = new Date(d.getTime() + 13272000);
+    const secs = t.getUTCHours() * 3600 + t.getUTCMinutes() * 60 + t.getUTCSeconds();
+    const mins = Math.round(secs / 60) % 1440;
+    return {
+      date: null,
+      time: String(Math.floor(mins / 60)).padStart(2, "0") + ":" +
+            String(mins % 60).padStart(2, "0")
+    };
+  }
+
+  const parts = {};
+  new Intl.DateTimeFormat("en-CA", {
+    timeZone: SHEET_TZ,
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+  }).formatToParts(d).forEach(p => { parts[p.type] = p.value; });
+
+  return {
+    date: `${parts.year}-${parts.month}-${parts.day}`,
+    time: `${parts.hour}:${parts.minute}`
+  };
+}
+
+function parseDate(value) {
+  if (!value) return null;
+
+  const str = String(value).trim();
+
+  if (isZonedIso(str)) {
+    const p = zonedParts(str);
+    if (p && p.date) return parseDate(p.date);
+  }
+
+  let match = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+
+  if (match) {
+    return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  }
+
+  match = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+
+  if (match) {
+    return new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
+  }
+
+  const result = new Date(str);
+  if (Number.isNaN(result.getTime())) return null;
+
+  return new Date(result.getFullYear(), result.getMonth(), result.getDate());
+}
+
+function normalizeTime(value, fallback) {
+  if (value === null || value === undefined || value === "") return fallback;
+
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return String(value.getHours()).padStart(2, "0") + ":" +
+      String(value.getMinutes()).padStart(2, "0");
+  }
+
+  const str = String(value).trim();
+
+  if (isZonedIso(str)) {
+    const p = zonedParts(str);
+    if (p) return p.time;
+  }
+
+  const match = str.match(/(?:T|\s)?(\d{1,2}):(\d{2})/);
+
+  if (match) {
+    return String(Number(match[1])).padStart(2, "0") + ":" + match[2];
+  }
+
+  return fallback;
+}
+
+function getRoom(roomId) {
+  return rooms.find(r => normalizeId(r.id) === normalizeId(roomId));
+}
+
+function roomName(roomId) {
+  const room = getRoom(roomId);
+  return room ? room.name : "غرفة غير معروفة";
+}
+
+function statusLabel(status) {
+  const s = String(status || "confirmed").toLowerCase();
+
+  if (["cancelled", "canceled", "ملغي", "الغاء", "إلغاء"].includes(s)) return "ملغي";
+  if (["pending", "قيد الانتظار", "معلق"].includes(s)) return "قيد الانتظار";
+  if (["rejected", "مرفوض"].includes(s)) return "مرفوض";
+
+  return "مؤكد";
+}
+
+function statusClass(status) {
+  const label = statusLabel(status);
+  if (label === "مؤكد") return "status-free";
+  if (label === "ملغي" || label === "مرفوض") return "status-other";
+  return "status-busy";
+}
+
+function isCancelled(booking) {
+  return ["ملغي", "مرفوض"].includes(statusLabel(booking.status));
+}
+
+function bookingDate(b) {
+  return parseDate(b.booking_date);
+}
+
+function bookingStart(b) {
+  const d = bookingDate(b);
+  if (!d) return null;
+
+  const t = normalizeTime(b.start_time, "00:00").split(":");
+  d.setHours(Number(t[0]), Number(t[1]), 0, 0);
+  return d;
+}
+
+function bookingEnd(b) {
+  const d = bookingDate(b);
+  if (!d) return null;
+
+  const t = normalizeTime(b.end_time, "23:59").split(":");
+  d.setHours(Number(t[0]), Number(t[1]), 0, 0);
+
+  const start = bookingStart(b);
+  if (start && d <= start) d.setDate(d.getDate() + 1);
+
+  return d;
+}
+
+function overlaps(aStart, aEnd, bStart, bEnd) {
+  return aStart < bEnd && aEnd > bStart;
+}
+
+function isActiveBooking(b) {
+  return !isCancelled(b);
+}
+
+function showMessage(id, text, type = "error") {
+  const el = $(id);
+  el.textContent = text;
+  el.className = "message show " + type;
+}
+
+function clearMessage(id) {
+  const el = $(id);
+  el.textContent = "";
+  el.className = "message";
+}
+
+/* ==========================================================
+   الاتصال بـ Google Apps Script
+   ========================================================== */
+
+async function apiRequest(params) {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("انتهت جلسة الدخول أو لم يتم تسجيل الدخول. يرجى تسجيل الدخول مجدداً.");
+  }
+
+  const query = new URLSearchParams({ ...params, token });
+
+  const response = await fetch(`${API_URL}?${query.toString()}`, {
+    method: "GET",
+    redirect: "follow"
+  });
+
+  if (!response.ok) {
+    throw new Error("تعذر الاتصال بالخادم. رمز الاستجابة: " + response.status);
+  }
+
+  const result = await response.json();
+
+  if (result.success === false) {
+    throw new Error(result.message || "رفض الخادم تنفيذ العملية.");
+  }
+
+  return result;
+}
+
+async function readSheet(sheet) {
+  const result = await apiRequest({ action: "read", sheet });
+
+  if (Array.isArray(result.rows)) return result.rows;
+  if (Array.isArray(result.data)) return result.data;
+
+  throw new Error("لم يرجع الخادم بيانات ورقة " + sheet + ".");
+}
+
+async function loadData() {
+  $("refreshBtn").disabled = true;
+  $("lastUpdated").textContent = "جارٍ تحميل البيانات...";
+
+  try {
+    const [roomRows, bookingRows] = await Promise.all([
+      readSheet("rooms"),
+      readSheet("bookings")
+    ]);
+
+    rooms = roomRows;
+    bookings = bookingRows.map(b => ({
+      ...b,
+      room_id: normalizeId(b.room_id),
+      booking_date: dateString(parseDate(b.booking_date) || new Date()),
+      start_time: normalizeTime(b.start_time, "00:00"),
+      end_time: normalizeTime(b.end_time, "23:59"),
+      status: b.status || "confirmed"
+    }));
+
+    clearMessage("pageMessage");
+    renderAll();
+
+    $("lastUpdated").textContent =
+      "آخر تحديث: " + new Date().toLocaleTimeString("ar-OM");
+
+  } catch (error) {
+    showMessage("pageMessage", error.message || "حدث خطأ أثناء تحميل البيانات.");
+    $("lastUpdated").textContent = "تعذر تحميل البيانات";
+  } finally {
+    $("refreshBtn").disabled = false;
+  }
+}
+
+/* ==========================================================
+   عرض البيانات
+   ========================================================== */
+
+function renderAll() {
+  renderStats();
+  renderRooms();
+  renderCalendar();
+  renderBookingsList();
+  fillRoomSelect();
+}
+
+function renderStats() {
+  const now = new Date();
+  const today = dateString(now);
+
+  $("roomsCount").textContent = rooms.length;
+
+  $("todayCount").textContent = bookings.filter(b =>
+    b.booking_date === today && isActiveBooking(b)
+  ).length;
+
+  $("busyCount").textContent = rooms.filter(room =>
+    bookings.some(b => {
+      if (!isActiveBooking(b)) return false;
+      if (normalizeId(b.room_id) !== normalizeId(room.id)) return false;
+
+      const start = bookingStart(b);
+      const end = bookingEnd(b);
+
+      return start && end && now >= start && now < end;
+    })
+  ).length;
+
+  $("upcomingCount").textContent = bookings.filter(b => {
+    const start = bookingStart(b);
+    return isActiveBooking(b) && start && start > now;
+  }).length;
+}
+
+function renderRooms() {
+  const container = $("roomsGrid");
+
+  if (!rooms.length) {
+    container.innerHTML = '<div class="loading">لا توجد غرف في ورقة البيانات.</div>';
+    return;
+  }
+
+  const now = new Date();
+
+  container.innerHTML = rooms.map(room => {
+    const current = bookings.find(b => {
+      if (!isActiveBooking(b)) return false;
+      if (normalizeId(b.room_id) !== normalizeId(room.id)) return false;
+
+      const start = bookingStart(b);
+      const end = bookingEnd(b);
+
+      return start && end && now >= start && now < end;
+    });
+
+    const price = room.price_full || "—";
+    const roomStatus = current ? "مشغولة الآن" : "متاحة الآن";
+
+    return `
+      <div class="room-card">
+        <h3>${escapeHtml(room.name || "غرفة")}</h3>
+        ${current ? `<p>الضيف : ${escapeHtml(current.guest_name || "غير متوفر")}</p>` : ""}
+        ${current ? `<p>رقم الهاتف: ${escapeHtml(current.guest_phone || "غير متوفر")}</p>` : ""}
+        <p>سعر اليوم الكامل: ${escapeHtml(price)} ر.ع</p>
+        <span class="status ${current ? "status-busy" : "status-free"}">
+          ${roomStatus}
+        </span>
+        ${current ? `
+          <button class="btn btn-small"
+            onclick="editBookingByKey('${escapeHtml(current.room_id)}','${escapeHtml(current.created_at)}')">
+            عرض الحجز
+          </button>
+        ` : ""}
+      </div>`;
+  }).join("");
+}
+
+function addDays(date, amount) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + amount);
+  return d;
+}
+
+/* ==========================================================
+   التقويم الشهري — مرتبط بعمود booking_date في ورقة bookings
+   ========================================================== */
+
+// حجوزات هذا اليوم حسب booking_date فقط (وقت البداية والنهاية لا يؤثران على اليوم)
+// الترتيب: room_id ثم start_time
+function bookingsOnDay(day) {
+  const key = dateString(day);
+
+  return bookings
+    .filter(b => isActiveBooking(b) && b.booking_date === key)
+    .sort((a, b) =>
+      normalizeId(a.room_id).localeCompare(normalizeId(b.room_id), undefined, { numeric: true }) ||
+      String(a.start_time).localeCompare(String(b.start_time))
+    );
+}
+
+function renderCalendar() {
+  const grid = $("calendarGrid");
+  const year = calendarDate.getFullYear();
+  const month = calendarDate.getMonth();
+
+  $("monthYear").textContent = `${monthNames[month]} ${year}`;
+
+  let html = "";
+
+  // أسماء أيام الأسبوع (الجمعة والسبت عطلة)
+  dayNames.forEach((name, index) => {
+    const cls = index === 5 ? " header-fri" : index === 6 ? " header-sat" : "";
+    html += `<div class="day-name${cls}">${name}</div>`;
+  });
+
+  // فراغات قبل أول يوم في الشهر
+  const padding = new Date(year, month, 1).getDay();
+  for (let i = 0; i < padding; i++) {
+    html += '<div class="day empty"></div>';
+  }
+
+  const totalDays = new Date(year, month + 1, 0).getDate();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  for (let d = 1; d <= totalDays; d++) {
+    const date = new Date(year, month, d);
+    const key = dateString(date);
+    const weekday = date.getDay();
+
+    const classes = ["day"];
+    if (weekday === 5 || weekday === 6) classes.push("weekend");
+    if (date.getTime() === today.getTime()) classes.push("today");
+    else if (date < today) classes.push("past-day");
+    if (key === selectedDay) classes.push("selected");
+
+    const list = bookingsOnDay(date);
+    const chips = list.slice(0, 2).map(b => `
+      <span class="day-chip" title="${escapeHtml(roomName(b.room_id))} - ${escapeHtml(b.guest_name)}">
+        ${escapeHtml(b.guest_name || "حجز")}
+      </span>`).join("");
+    const more = list.length > 2
+      ? `<span class="day-more">+${list.length - 2} أخرى</span>` : "";
+
+    html += `
+      <div class="${classes.join(" ")}" data-date="${key}">
+        <span class="day-num">${d}</span>
+        ${list.length ? `
+          <div class="day-chips">${chips}${more}</div>
+          <span class="day-count">${list.length}</span>` : ""}
+      </div>`;
+  }
+
+  grid.innerHTML = html;
+  renderDayPanel();
+}
+
+function renderDayPanel() {
+  const panel = $("dayPanel");
+  const day = parseDate(selectedDay);
+
+  if (!day) {
+    panel.classList.add("hidden");
+    return;
+  }
+
+  panel.classList.remove("hidden");
+
+  $("dayPanelTitle").textContent = day.toLocaleDateString("ar-OM", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric"
+  });
+
+  const list = bookingsOnDay(day);
+
+  if (!list.length) {
+    $("dayPanelList").innerHTML =
+      '<div class="muted" style="padding:10px 0">لا توجد حجوزات في هذا اليوم.</div>';
+    return;
+  }
+
+  $("dayPanelList").innerHTML = list.map(b => `
+    <div class="day-booking">
+      <div>
+        <strong>${escapeHtml(b.guest_name || "حجز")}</strong>
+        — ${escapeHtml(roomName(b.room_id))}
+        <div class="meta">
+          ${escapeHtml(b.start_time)}–${escapeHtml(b.end_time)}
+          · ${escapeHtml(b.guest_phone || "")}
+          · ${escapeHtml(b.price || "0")} ر.ع
+        </div>
+      </div>
+      <div class="actions">
+        <span class="status ${statusClass(b.status)}">${statusLabel(b.status)}</span>
+        <button class="btn btn-small"
+          onclick="editBookingByKey('${escapeHtml(b.room_id)}','${escapeHtml(b.created_at)}')">
+          تعديل
+        </button>
+      </div>
+    </div>`).join("");
+}
+
+function renderBookingsList() {
+  const tbody = $("bookingsBody");
+  const search = $("searchBookings").value.trim().toLowerCase();
+  const filter = $("statusFilter").value;
+
+  const filtered = bookings
+    .filter(b => {
+      const searchable = [
+        b.guest_name,
+        b.guest_phone,
+        roomName(b.room_id),
+        b.booking_date
+      ].join(" ").toLowerCase();
+
+      const statusMatches = !filter ||
+        String(b.status || "confirmed").toLowerCase() === filter ||
+        statusLabel(b.status) === ({
+          confirmed: "مؤكد",
+          pending: "قيد الانتظار",
+          cancelled: "ملغي"
+        })[filter];
+
+      return searchable.includes(search) && statusMatches;
+    })
+    .sort((a, b) => (bookingStart(b) || 0) - (bookingStart(a) || 0));
+
+  if (!filtered.length) {
+    tbody.innerHTML = `
+      <tr><td colspan="8" style="text-align:center;padding:20px">
+        لا توجد حجوزات مطابقة.
+      </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(b => `
+    <tr>
+      <td>${escapeHtml(b.guest_name)}</td>
+      <td>${escapeHtml(b.guest_phone)}</td>
+      <td>${escapeHtml(roomName(b.room_id))}</td>
+      <td>${escapeHtml(b.booking_date)}</td>
+      <td>${escapeHtml(b.start_time)}–${escapeHtml(b.end_time)}</td>
+      <td>${escapeHtml(b.price || "0")} ر.ع</td>
+      <td><span class="status ${statusClass(b.status)}">
+        ${statusLabel(b.status)}
+      </span></td>
+      <td>
+        <div class="actions">
+          <button class="btn btn-small"
+            onclick="editBookingByKey('${escapeHtml(b.room_id)}','${escapeHtml(b.created_at)}')">
+            تعديل
+          </button>
+          <button class="btn btn-small btn-danger"
+            onclick="deleteBookingByKey('${escapeHtml(b.room_id)}','${escapeHtml(b.created_at)}')">
+            حذف
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join("");
+}
+
+/* ==========================================================
+   نافذة الحجز
+   ========================================================== */
+
+function fillRoomSelect(selectedId) {
+  const select = $("roomSelect");
+  const previous = selectedId ?? select.value;
+
+  select.innerHTML = rooms.map(r => `
+    <option value="${escapeHtml(r.id)}">
+      ${escapeHtml(r.name || "غرفة")}
+    </option>
+  `).join("");
+
+  if (previous && rooms.some(r => normalizeId(r.id) === normalizeId(previous))) {
+    select.value = previous;
+  }
+}
+
+function setShift(shift) {
+  currentShift = shift;
+
+  document.querySelectorAll(".shift-option").forEach(button => {
+    button.classList.toggle("active", button.dataset.shift === shift);
+  });
+
+  const starts = { full: "09:00", h1: "09:00", h2: "17:00", custom: "09:00" };
+  const ends   = { full: "21:00", h1: "15:00", h2: "22:00", custom: "07:00" };
+
+  $("startTime").value = starts[shift];
+  $("endTime").value = ends[shift];
+  updateArabicTimeLabels();
+  if (shift !== "custom") updatePrice();
+}
+
+function updatePrice() {
+  const room = getRoom($("roomSelect").value);
+  if (!room) return;
+
+  const priceMap = {
+    full: room.price_full,
+    h1: room.price_h1,
+    h2: room.price_h2
+  };
+
+  if (currentShift !== "custom" && priceMap[currentShift] !== undefined) {
+    $("bookingPrice").value = priceMap[currentShift];
+  }
+}
+
+// dateValue اختياري: يملأ تاريخ الحجز باليوم المحدد في التقويم
+function openNewBooking(dateValue) {
+  editingBooking = null;
+  $("bookingForm").reset();
+  clearMessage("modalMessage");
+  $("modalTitle").textContent = "إضافة حجز جديد";
+  $("saveBtn").textContent = "حفظ الحجز";
+  $("originalRoomId").value = "";
+  $("originalCreatedAt").value = "";
+  $("roomSelect").disabled = false;
+  $("roomEditNote").classList.add("hidden");
+  $("bookingDate").value =
+    typeof dateValue === "string" && dateValue ? dateValue : dateString(new Date());
+  $("bookingStatus").value = "confirmed";
+
+  fillRoomSelect();
+  setShift("full");
+  $("bookingModal").classList.add("open");
+}
+
+function findBooking(roomId, createdAt) {
+  return bookings.find(b =>
+    normalizeId(b.room_id) === normalizeId(roomId) &&
+    String(b.created_at || "") === String(createdAt || "")
+  );
+}
+
+function editBookingByKey(roomId, createdAt) {
+  const booking = findBooking(roomId, createdAt);
+
+  if (!booking) {
+    showMessage("pageMessage", "لم يتم العثور على الحجز. حدّث البيانات وحاول مجدداً.");
+    return;
+  }
+
+  editingBooking = { ...booking };
+  clearMessage("modalMessage");
+
+  $("modalTitle").textContent = "تعديل الحجز";
+  $("saveBtn").textContent = "حفظ التعديلات";
+  $("guestName").value = booking.guest_name || "";
+  $("guestPhone").value = booking.guest_phone || "";
+  $("bookingDate").value = booking.booking_date;
+  $("bookingRemarks").value = booking.remarks || "";
+  $("bookingPrice").value = booking.price || 0;
+  $("bookingStatus").value = booking.status || "confirmed";
+  $("startTime").value = booking.start_time || "14:00";
+  $("endTime").value = booking.end_time || "19:00";
+  $("originalRoomId").value = booking.room_id;
+  $("originalCreatedAt").value = booking.created_at || "";
+  updateArabicTimeLabels();
+
+  fillRoomSelect(booking.room_id);
+  $("roomSelect").value = booking.room_id;
+  $("roomSelect").disabled = true;
+  $("roomEditNote").classList.remove("hidden");
+
+  const shift = ["full", "h1", "h2", "custom"].includes(booking.shift)
+    ? booking.shift : "custom";
+  currentShift = shift;
+
+  document.querySelectorAll(".shift-option").forEach(button => {
+    button.classList.toggle("active", button.dataset.shift === shift);
+  });
+
+  $("bookingModal").classList.add("open");
+}
+
+function closeModal() {
+  if (saving) return;
+  $("bookingModal").classList.remove("open");
+}
+
+function validateBooking() {
+  const name = $("guestName").value.trim();
+  const phone = $("guestPhone").value.trim();
+  const date = $("bookingDate").value;
+  const start = $("startTime").value;
+  const end = $("endTime").value;
+  const roomId = $("roomSelect").value;
+
+  if (!name || !phone || !date || !start || !end || !roomId) {
+    throw new Error("يرجى تعبئة جميع الحقول المطلوبة.");
+  }
+
+  if (start === end) {
+    throw new Error("وقت البداية والنهاية لا يمكن أن يكونا متطابقين.");
+  }
+
+  const newStart = new Date(`${date}T${start}:00`);
+  const newEnd = new Date(`${date}T${end}:00`);
+
+  if (newEnd <= newStart) newEnd.setDate(newEnd.getDate() + 1);
+
+  const conflict = bookings.some(b => {
+    if (!isActiveBooking(b)) return false;
+    if (normalizeId(b.room_id) !== normalizeId(roomId)) return false;
+
+    // تجاهل الحجز نفسه عند تعديل بياناته
+    if (editingBooking &&
+        normalizeId(b.room_id) === normalizeId(editingBooking.room_id) &&
+        String(b.created_at || "") === String(editingBooking.created_at || "")) {
+      return false;
+    }
+
+    const oldStart = bookingStart(b);
+    const oldEnd = bookingEnd(b);
+
+    return oldStart && oldEnd && overlaps(newStart, newEnd, oldStart, oldEnd);
+  });
+
+  if (conflict) {
+    throw new Error("توجد حجوزات أخرى متداخلة لهذه الغرفة في الوقت المحدد.");
+  }
+
+  return { newStart, newEnd };
+}
+
+/* ==========================================================
+   حفظ / تعديل / حذف
+   ========================================================== */
+
+async function saveBooking(event) {
+  event.preventDefault();
+  if (saving) return;
+
+  clearMessage("modalMessage");
+
+  try {
+    validateBooking();
+  } catch (error) {
+    showMessage("modalMessage", error.message);
+    return;
+  }
+
+  const date = $("bookingDate").value;
+  const record = {
+    room_id: editingBooking ? editingBooking.room_id : $("roomSelect").value,
+    guest_name: $("guestName").value.trim(),
+    guest_phone: $("guestPhone").value.trim(),
+    booking_date: date,
+    shift: currentShift,
+    start_time: $("startTime").value,
+    end_time: $("endTime").value,
+    price: Number($("bookingPrice").value || 0),
+    remarks: $("bookingRemarks").value.trim(),
+    status: $("bookingStatus").value
+  };
+
+  if (editingBooking) {
+    record.room_id = editingBooking.room_id;
+    record.created_at = editingBooking.created_at;
+  }
+
+  saving = true;
+  $("saveBtn").disabled = true;
+  $("saveBtn").textContent = "جارٍ الحفظ...";
+
+  try {
+    const result = await apiRequest({
+      action: editingBooking ? "update" : "add",
+      sheet: "bookings",
+      record: JSON.stringify(record)
+    });
+
+    if (result.success === false) {
+      throw new Error(result.message || "لم يتم حفظ الحجز.");
+    }
+
+    const wasEditing = !!editingBooking;
+
+    $("bookingModal").classList.remove("open");
+
+    // الانتقال في التقويم إلى شهر ويوم الحجز المحفوظ
+    const savedDate = parseDate(date);
+    if (savedDate) {
+      calendarDate = new Date(savedDate.getFullYear(), savedDate.getMonth(), 1);
+      selectedDay = dateString(savedDate);
+    }
+location.reload();
+    // await loadData();
+
+    // showMessage(
+    //   "pageMessage",
+    //   wasEditing ? "تم تحديث بيانات الحجز." : "تمت إضافة الحجز بنجاح.",
+    //   "success"
+    // );
+
+  } catch (error) {
+    showMessage(
+      "modalMessage",
+      "تعذر حفظ الحجز: " + (error.message || "خطأ غير معروف") +
+      " — تحقق من دعم Code.gs لعملية " +
+      (editingBooking ? "update" : "add") + "."
+    );
+  } finally {
+    saving = false;
+    $("saveBtn").disabled = false;
+    $("saveBtn").textContent = editingBooking ? "حفظ التعديلات" : "حفظ الحجز";
+  }
+}
+
+async function deleteBookingByKey(roomId, createdAt) {
+  const booking = findBooking(roomId, createdAt);
+
+  if (!booking) {
+    showMessage("pageMessage", "لم يتم العثور على الحجز المطلوب.");
+    return;
+  }
+
+  const confirmed = confirm(
+    `هل تريد حذف حجز ${booking.guest_name || ""} في ${roomName(roomId)}؟`
+  );
+
+  if (!confirmed) return;
+
+  try {
+    await apiRequest({
+      action: "delete",
+      sheet: "bookings",
+      room_id: booking.room_id,
+      created_at: booking.created_at
+    });
+
+    await loadData();
+
+    showMessage("pageMessage", "تم حذف الحجز.", "success");
+
+  } catch (error) {
+    showMessage("pageMessage", "تعذر حذف الحجز: " + (error.message || "خطأ غير معروف"));
+  }
+}
+
+/* ==========================================================
+   الأحداث
+   ========================================================== */
+
+$("refreshBtn").addEventListener("click", loadData);
+$("newBookingBtn").addEventListener("click", () => openNewBooking());
+$("dayNewBookingBtn").addEventListener("click", () => openNewBooking(selectedDay));
+$("closeModalBtn").addEventListener("click", closeModal);
+$("cancelModalBtn").addEventListener("click", closeModal);
+$("bookingForm").addEventListener("submit", saveBooking);
+
+$("bookingModal").addEventListener("click", event => {
+  if (event.target === $("bookingModal")) closeModal();
+});
+
+document.querySelectorAll(".shift-option").forEach(button => {
+  button.addEventListener("click", () => setShift(button.dataset.shift));
+});
+
+$("roomSelect").addEventListener("change", updatePrice);
+
+$("calendarTab").addEventListener("click", () => {
+  $("calendarView").classList.remove("hidden");
+  $("listView").classList.add("hidden");
+  $("calendarTab").classList.add("active");
+  $("listTab").classList.remove("active");
+});
+
+$("listTab").addEventListener("click", () => {
+  $("listView").classList.remove("hidden");
+  $("calendarView").classList.add("hidden");
+  $("listTab").classList.add("active");
+  $("calendarTab").classList.remove("active");
+  renderBookingsList();
+});
+
+$("searchBookings").addEventListener("input", renderBookingsList);
+$("statusFilter").addEventListener("change", renderBookingsList);
+
+// التنقل بين الأشهر
+$("prevMonthBtn").addEventListener("click", () => {
+  calendarDate = new Date(calendarDate.getFullYear(), calendarDate.getMonth() - 1, 1);
+  renderCalendar();
+});
+
+$("nextMonthBtn").addEventListener("click", () => {
+  calendarDate = new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 1);
+  renderCalendar();
+});
+
+$("todayBtn").addEventListener("click", () => {
+  calendarDate = new Date();
+  selectedDay = dateString(calendarDate);
+  renderCalendar();
+});
+
+// الضغط على يوم في التقويم
+$("calendarGrid").addEventListener("click", event => {
+  const cell = event.target.closest(".day[data-date]");
+  if (!cell) return;
+  selectedDay = cell.dataset.date;
+  renderCalendar();
+});
+
+/* ==========================================================
+   قائمة اختيار الوقت
+   ========================================================== */
+
+function formatArabicTime(time) {
+  if (!time) return "";
+
+  const parts = time.split(":");
+  let hours = parseInt(parts[0], 10);
+  const minutes = parts[1] || "00";
+
+  const period = hours >= 12 ? "مساءً" : "صباحًا";
+
+  hours = hours % 12;
+  if (hours === 0) hours = 12;
+
+  return `${hours}:${minutes} ${period}`;
+}
+
+function buildTimeOptions() {
+  ["startTime", "endTime"].forEach(id => {
+    const options = $(id + "Options");
+    options.innerHTML = "";
+
+    // من 09:00 صباحاً كل ساعة حتى 08:00 صباحاً
+    for (let i = 0; i < 24; i++) {
+      const hours = (9 + i) % 24;
+      const value = String(hours).padStart(2, "0") + ":00";
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "time-option";
+      button.textContent = formatArabicTime(value);
+
+      button.addEventListener("click", () => {
+        $(id).value = value;
+        updateArabicTimeLabels();
+        options.classList.remove("open");
+      });
+
+      options.appendChild(button);
+
+      if (hours === 8) break;
+    }
+  });
+}
+
+function updateArabicTimeLabels() {
+  ["startTime", "endTime"].forEach(id => {
+    const value = $(id).value;
+    const button = $(id + "Button");
+    const label = $(id + "Arabic");
+    const options = $(id + "Options");
+
+    button.textContent = value ? formatArabicTime(value) : "اختر الوقت";
+    label.textContent = "";
+
+    options.querySelectorAll(".time-option").forEach(option => {
+      option.classList.toggle(
+        "selected",
+        option.textContent === formatArabicTime(value) && !!value
+      );
+    });
+  });
+}
+
+function toggleTimeOptions(id) {
+  const current = $(id + "Options");
+  const wasOpen = current.classList.contains("open");
+
+  document.querySelectorAll(".time-picker-options").forEach(menu => {
+    menu.classList.remove("open");
+  });
+
+  if (!wasOpen) current.classList.add("open");
+}
+
+$("startTimeButton").addEventListener("click", () => toggleTimeOptions("startTime"));
+$("endTimeButton").addEventListener("click", () => toggleTimeOptions("endTime"));
+
+document.addEventListener("click", event => {
+  if (!event.target.closest(".time-picker")) {
+    document.querySelectorAll(".time-picker-options").forEach(menu => {
+      menu.classList.remove("open");
+    });
+  }
+});
+
+buildTimeOptions();
+
+/* بدء التطبيق */
+renderCalendar();
+loadData();
+</script>
+</body>
+</html>

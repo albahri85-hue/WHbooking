@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>تسجيل الدخول | حجوزاتي</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <main class="login-container">
+
+        <!-- App Header -->
+        <header class="app-header">
+            <div class="app-logo">
+                <div class="logoshape">
+                    <span>
+                        <!-- <img src="Logo2.png" alt="شعار حجوزاتي"> -->
+                         <img src="Logo3.jpg" alt="شعار حجوزاتي">
+                    </span>
+                </div>
+            </div>
+
+            <h1>حجوزاتي</h1>
+        </header>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="login-form">
+
+            <div class="welcome-text">
+                <h2>مرحباً بك</h2>
+                <p>يرجى تسجيل الدخول للمتابعة.</p>
+            </div>
+
+            <!-- Email -->
+            <div class="input-group">
+                <label for="email">عنوان البريد الإلكتروني</label>
+
+                <input
+                    type="text"
+                    id="email"
+                    name="email"
+                    placeholder="أدخل البريد الإلكتروني"
+                    autocomplete="username"
+                    required
+                >
+            </div>
+
+            <!-- Password -->
+            <div class="input-group">
+                <label for="password">كلمة المرور</label>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="أدخل كلمة المرور"
+                    autocomplete="current-password"
+                    required
+                >
+            </div>
+
+            <!-- Login Button -->
+            <button
+                type="submit"
+                class="login-btn"
+                id="loginButton"
+            >
+                <span class="button-text">تسجيل الدخول</span>
+                <span class="arrow" aria-hidden="true">←</span>
+            </button>
+
+            <!-- Login Status -->
+            <p
+                id="message"
+                class="message"
+                role="status"
+                aria-live="polite"
+            ></p>
+
+            <p class="footer-text">
+                دخول آمن إلى حسابك
+            </p>
+
+        </form>
+
+    </main>
+
+    <script>
+        const API_URL =
+            "https://script.google.com/macros/s/AKfycbyhY5DrU7M9OqPUleO7BlOG2n_8UagOu0-UGzjTGPqKsjEXY63az8GHduGjfQc0NpmmKQ/exec";
+
+        const loginForm = document.getElementById("loginForm");
+        const loginButton = document.getElementById("loginButton");
+        const message = document.getElementById("message");
+
+        loginForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+
+            loginButton.disabled = true;
+            message.textContent = "جارٍ التحقق من بيانات الدخول...";
+
+            try {
+                // Send credentials to the general Apps Script API.
+                const formData = new URLSearchParams();
+
+                formData.append("action", "login");
+                formData.append("email", email);
+                formData.append("password", password);
+
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error("Request failed: " + response.status);
+                }
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    message.textContent =
+                        result.message || "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
+                    return;
+                }
+
+                // Validate the role before redirecting.
+                const role = String(result.role || "").toLowerCase();
+
+                if (role !== "sup_admin" && role !== "admin" && role !== "viewer") {
+                    message.textContent =
+                        "تم تسجيل الدخول، ولكن لا توجد صفحة مخصصة لهذا الدور.";
+                    return;
+                }
+
+                if (!result.token) {
+                    message.textContent =
+                        "لم يتم استلام رمز الجلسة. يرجى مراجعة إعدادات الخادم.";
+                    return;
+                }
+
+                // Store the token for subsequent API requests.
+                sessionStorage.setItem("token", result.token);
+                sessionStorage.setItem("role", role);
+                sessionStorage.setItem("userEmail", result.email || email);
+
+                message.textContent = "تم تسجيل الدخول بنجاح.";
+
+                // Redirect according to the user's role.
+                if (role === "sup_admin") {
+                    window.location.replace("rooms.html");
+                }else if (role === "admin") {
+                    window.location.replace("booking.html");
+                } else {
+                    window.location.replace("dashboard.html");
+                }
+
+            } catch (error) {
+                console.error("Login error:", error);
+
+                message.textContent =
+                    "تعذر الاتصال بالخادم. تحقق من رابط API وإعدادات النشر.";
+            } finally {
+                loginButton.disabled = false;
+            }
+        });
+    </script>
+
+</body>
+</html>

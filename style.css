@@ -1,0 +1,249 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    /* font-family: 'Tajawal', 'Segoe UI', Arial, sans-serif; */
+    font-family: Tahoma, Arial, sans-serif;
+}
+
+/* App background */
+body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: linear-gradient(
+        145deg,
+        #f3edff 0%,
+        #f8f7fc 45%,
+        #ffffff 100%
+    );
+}
+
+/* Main mobile app card */
+.login-container {
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(70, 45, 110, 0.12);
+}
+
+/* Purple app header */
+.app-header {
+    text-align: center;
+    /* padding: 38px 24px 42px; */
+    color: #ffffff;
+    background: linear-gradient(
+        135deg,
+        #711993,
+        #fecdfe
+    );
+    border-radius: 0 0 35px 35px;*/
+}
+
+.app-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.logoshape {
+    width: 50%;
+    aspect-ratio: 1 / 1;
+     border: 5px solid #fefefe; 
+    border-radius: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.logoshape img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}           
+
+.app-logo span {
+    font-size: 38px;
+    color: #ffffff;
+}
+
+.app-header h1 {
+    font-size: 20px;
+    /* font-weight: 700; */
+    /* letter-spacing: 5px; */
+    margin-top: 7px;
+}
+
+.app-header p {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Login form */
+.login-form {
+    padding: 35px 28px 28px;
+}
+
+.welcome-text {
+    margin-bottom: 30px;
+}
+
+.welcome-text h2 {
+    font-size: 27px;
+    color: #252238;
+    font-weight: 700;
+    margin-bottom: 9px;
+}
+
+.welcome-text p {
+    font-size: 14px;
+    color: #858397;
+}
+
+/* Input fields */
+.input-group {
+    margin-bottom: 22px;
+}
+
+.input-group label {
+    display: block;
+    color: #373449;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 9px;
+}
+
+.input-group input {
+    width: 100%;
+    height: 54px;
+    padding: 0 16px;
+    background: #eae7ea;
+    border: 1px solid #fffefe;
+    border-radius: 13px;
+    outline: none;
+    color: #000000;
+    font-size: 14px;
+    transition: all 0.25s ease;
+}
+
+.input-group input::placeholder {
+    color: #aaa6b8;
+}
+
+.input-group input:focus {
+    background: #ffffff;
+    border-color: #764ba2;
+    box-shadow: 0 0 0 4px rgba(118, 75, 162, 0.09);
+}
+
+/* Forgot password */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: -5px;
+    margin-bottom: 25px;
+}
+
+.forgot-pass {
+    color: #764ba2;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.forgot-pass:hover {
+    text-decoration: underline;
+}
+
+/* Login button */
+.login-btn {
+    width: 100%;
+    height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    position: relative;
+    background: linear-gradient(
+        135deg,
+        #711993,
+        #fecdfe
+    );
+    color: #ffffff;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(118, 75, 162, 0.22);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-btn .arrow {
+    font-size: 22px;
+    line-height: 1;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(118, 75, 162, 0.28);
+}
+
+.login-btn:active {
+    transform: scale(0.98);
+}
+
+/* Footer */
+.footer-text {
+    text-align: center;
+    color: #aaa6b8;
+    font-size: 12px;
+    margin-top: 26px;
+}
+
+/* Mobile screens */
+@media (max-width: 480px) {
+    body {
+        padding: 0;
+        align-items: stretch;
+        background: #ffffff;
+    }
+
+    .login-container {
+        max-width: none;
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .app-header {
+        padding: 48px 24px 42px;
+        border-radius: 0 0 35px 35px;
+    }
+
+    .login-form {
+        flex: 1;
+        padding: 38px 25px 30px;
+    }
+
+    .welcome-text h2 {
+        font-size: 28px;
+    }
+
+    .input-group input {
+        height: 56px;
+    }
+
+    .login-btn {
+        height: 56px;
+    }
+}
