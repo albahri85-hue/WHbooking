@@ -28,9 +28,9 @@ body {
     width: 100%;
     max-width: 420px;
     background: #ffffff;
-    border-radius: 28px;
+    /* border-radius: 28px; */
     overflow: hidden;
-    box-shadow: 0 20px 60px rgba(70, 45, 110, 0.12);
+    /* box-shadow: 0 20px 60px rgba(70, 45, 110, 0.12); */
 }
 
 /* Purple app header */
@@ -38,24 +38,27 @@ body {
     text-align: center;
     /* padding: 38px 24px 42px; */
     color: #ffffff;
-    background: linear-gradient(
+    /* background: linear-gradient(
         135deg,
-        #711993,
-        #fecdfe
-    );
-    border-radius: 0 0 35px 35px;*/
+        #ffffff,
+        #ffffff
+    ); */
+    /* border-radius: 0 0 35px 35px; */
+    /* background: Black; */
 }
 
 .app-logo {
     display: flex;
     justify-content: center;
     align-items: center;
+    
 }
 .logoshape {
     width: 50%;
     aspect-ratio: 1 / 1;
-     border: 5px solid #fefefe; 
-    border-radius: 100%;
+     /* border: 5px solid #711993;  */
+
+    /* border-radius: 100%; */
     overflow: hidden;
     display: flex;
     justify-content: center;
@@ -75,9 +78,10 @@ body {
 
 .app-header h1 {
     font-size: 20px;
+    
     /* font-weight: 700; */
     /* letter-spacing: 5px; */
-    margin-top: 7px;
+    margin-top: 0px;
 }
 
 .app-header p {
@@ -87,18 +91,24 @@ body {
 
 /* Login form */
 .login-form {
-    padding: 35px 28px 28px;
+    /* padding: 300px 28px 28px; */
 }
 
 .welcome-text {
     margin-bottom: 30px;
+
 }
 
 .welcome-text h2 {
     font-size: 27px;
-    color: #252238;
+    color: #711993;
     font-weight: 700;
     margin-bottom: 9px;
+    
+}
+.message{
+    font-size: 14px;
+    color: #858397;
 }
 
 .welcome-text p {
@@ -173,7 +183,7 @@ body {
     background: linear-gradient(
         135deg,
         #711993,
-        #fecdfe
+        #711993
     );
     color: #ffffff;
     border: none;
@@ -226,13 +236,13 @@ body {
     }
 
     .app-header {
-        padding: 48px 24px 42px;
+        padding: 48px 24px 0px;
         border-radius: 0 0 35px 35px;
     }
 
     .login-form {
         flex: 1;
-        padding: 38px 25px 30px;
+        padding: 0px 25px 30px;
     }
 
     .welcome-text h2 {
