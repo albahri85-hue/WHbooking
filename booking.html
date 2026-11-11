@@ -532,8 +532,10 @@ input[type="date"] {
   <div class="hero-actions">
     <button class="btn btn-glass hidden" id="refreshBtn">↻ تحديث البيانات</button>
     <button class="btn btn-accent hidden" id="newBookingBtn">＋ حجز جديد</button>
-    <button class="btn btn-glass" type="button"
-      onclick="sessionStorage.clear(); window.location.href='index.html';">خروج</button>
+<button class="btn btn-glass" type="button"
+  onclick="sessionStorage.clear();
+           if (window.AndroidBridge) { AndroidBridge.exitApp(); }
+           else { window.close(); }">خروج</button>
   </div>
 </div>
 
@@ -2151,6 +2153,12 @@ renderCalendar();
 renderExpenses();
 loadData();
 
+  webView.addJavascriptInterface(new Object() {
+    @android.webkit.JavascriptInterface
+    public void exitApp() {
+        runOnUiThread(() -> finishAffinity());
+    }
+}, "AndroidBridge");
 
 </script>
 </body>
