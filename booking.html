@@ -533,9 +533,7 @@ input[type="date"] {
     <button class="btn btn-glass hidden" id="refreshBtn">↻ تحديث البيانات</button>
     <button class="btn btn-accent hidden" id="newBookingBtn">＋ حجز جديد</button>
 <button class="btn btn-glass" type="button"
-  onclick="sessionStorage.clear();
-           if (window.AndroidBridge) { AndroidBridge.exitApp(); }
-           else { window.close(); }">خروج</button>
+  onclick="sessionStorage.clear(); window.close();">خروج</button>
   </div>
 </div>
 
@@ -2153,12 +2151,12 @@ renderCalendar();
 renderExpenses();
 loadData();
 
-  webView.addJavascriptInterface(new Object() {
-    @android.webkit.JavascriptInterface
-    public void exitApp() {
-        runOnUiThread(() -> finishAffinity());
+webView.setWebChromeClient(new WebChromeClient() {
+    @Override
+    public void onCloseWindow(WebView window) {
+        finishAffinity();
     }
-}, "AndroidBridge");
+});
 
 </script>
 </body>
