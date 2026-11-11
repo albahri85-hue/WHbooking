@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>إدارة حجوزات الاستراحة</title>
+
+<style>
+:root {
+  --purple: #711993;
+  --purple-dark: #711993;
+  --purple-light: #f2ecfa;
+  --bg: #f6f5fa;
+  --text: #29253a;
+  --muted: #777386;
+  --border: #e8e4ef;
+  --green: #20865b;
+  --red: #c33c4a;
+  --orange: #b97716;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Tahoma, Arial, sans-serif;
+  font-size: 13px;
+}
+
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+
+.topbar {
+  background: linear-gradient(120deg, var(--purple-dark), var(--purple));
+  color: white;
+  padding: 13px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.topbar h1 { font-size: 19px; margin: 0; }
+.topbar small { display: block; opacity: .85; margin-top: 5px; }
+
+.container { max-width: 1450px; margin: auto; padding: 14px; }
+
+.toolbar-group { display: flex; gap: 7px; flex-wrap: wrap; }
+
+.btn {
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 7px;
+  font-size: 12px;
+}
+.btn-primary { background: var(--purple); color: white; border-color: var(--purple); }
+.btn-primary:hover { background: var(--purple-dark); }
+.btn-danger { color: var(--red); border-color: #f0c9ce; }
+.btn-danger:hover { background: #fff0f0; }
+.btn-small { padding: 4px 9px; font-size: 11px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.panel {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 13px;
+  min-width: 0;
+}
+.panel-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.panel-heading h2 { font-size: 14px; margin: 0; }
+
+.tabs { display: flex; gap: 5px; }
+.tab {
+  background: #f4f1f8;
+  border: 0;
+  border-radius: 6px;
+  padding: 7px 11px;
+  color: var(--text);
+  font-size: 12px;
+}
+.tab.active { background: var(--purple); color: white; }
+
+.section-bar { margin-bottom: 10px; }
+
+.table-scroll { width: 100%; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+th, td {
+  padding: 8px 9px;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+}
+th { background: #f7f4fb; color: #5b4b71; font-weight: bold; }
+tbody tr:hover { background: #fbf9fe; }
+
+.actions { display: flex; gap: 5px; }
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(24, 17, 38, .55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  z-index: 1000;
+}
+.modal.open { display: flex; }
+
+.modal-content {
+  width: min(510px, 100%);
+  max-height: 92vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 12px;
+  padding: 17px;
+  box-shadow: 0 15px 50px #0002;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 13px;
+}
+.modal-header h2 { font-size: 16px; margin: 0; }
+.close-btn { border: 0; background: #f0edf5; border-radius: 6px; padding: 5px 9px; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+.field { min-width: 0; }
+.field.full { grid-column: 1 / -1; }
+.field label { display: block; font-size: 11px; margin-bottom: 5px; color: #625b70; }
+.field input, .field select, .field textarea {
+  width: 100%;
+  border: 1px solid #ded8e8;
+  border-radius: 6px;
+  padding: 9px;
+  background: white;
+  outline: none;
+  font-size: 12px;
+}
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--purple); }
+.field input[readonly] { background: #f4f1f8; color: var(--muted); }
+.field small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+
+.form-actions { display: flex; gap: 7px; margin-top: 14px; }
+.form-actions button { flex: 1; }
+
+.message {
+  display: none;
+  padding: 10px;
+  border-radius: 7px;
+  margin-bottom: 10px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.message.show { display: block; background: #f2ecfa; color: #49306e; }
+.message.error { background: #fff0f0; color: #a12532; }
+.message.success { background: #e9f8ef; color: #176a42; }
+
+.muted { color: var(--muted); }
+.hidden { display: none !important; }
+
+@media (max-width: 650px) {
+  .container { padding: 9px; }
+  .topbar { padding: 12px; }
+  .topbar h1 { font-size: 16px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .field.full { grid-column: auto; }
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+  <div>
+    <h1>إدارة النظام</h1>
+    <small>إدارة ملفات</small>
+  </div>
+  <div class="toolbar-group">
+    <button class="btn" type="button" onclick="window.location.href='booking.html'">صفحة الحجوزات</button>
+    <button class="btn btn-primary" type="button" onclick="sessionStorage.clear(); window.location.href='index.html';">خروج</button>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="panel">
+    <div class="panel-heading">
+      <h2>إدارة</h2>
+      <div class="tabs">
+        <button class="tab active" id="listTab" type="button">الغرف</button>
+        <button class="tab" id="usersTab" type="button">المستخدمين</button>
+      </div>
+    </div>
+
+    <!-- الغرف -->
+    <div id="roomsSection">
+      <div class="section-bar">
+        <button class="tab active" id="addButton" type="button">إضافة غرفة</button>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>اسم الغرفة</th>
+              <th>الحالة</th>
+              <th>سعر المبيت</th>
+              <th>يوم كامل</th>
+              <th>نصف يوم1</th>
+              <th>نصف يوم2</th>
+              <th class="admin-col">إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="roomsBody">
+            <tr><td colspan="7">جاري تحميل الغرف...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- المستخدمين -->
+    <div id="usersSection" class="hidden">
+      <div class="section-bar">
+        <button class="tab active" id="addUserButton" type="button">إضافة مستخدم</button>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>اسم المستخدم</th>
+              <th>الصلاحية</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="usersBody">
+            <tr><td colspan="4">جاري تحميل المستخدمين...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- نافذة الغرفة (إضافة / تعديل) -->
+  <div class="modal" id="roomModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="roomModalTitle">إضافة غرفة جديدة</h2>
+        <button class="close-btn" type="button" id="closeRoomModalBtn">✕</button>
+      </div>
+
+      <div id="formMessage" class="message"></div>
+
+      <form id="roomForm">
+        <div class="form-grid">
+          <div class="field">
+            <label for="roomName">اسم الغرفة *</label>
+            <input id="roomName" type="text" required maxlength="150">
+          </div>
+          <div class="field">
+            <label for="roomStatus">الحالة</label>
+            <select id="roomStatus">
+              <option value="Open">Open</option>
+              <option value="Close">Close</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="roomSleepOver">سعر المبيت (ر.ع)</label>
+            <input id="roomSleepOver" type="number" min="0" step="0.01">
+          </div>
+          <div class="field">
+            <label for="roomFull">سعر اليوم الكامل (ر.ع)</label>
+            <input id="roomFull" type="number" min="0" step="0.01">
+          </div>
+          <div class="field">
+            <label for="roomH1">سعر نصف اليوم الأول (ر.ع)</label>
+            <input id="roomH1" type="number" min="0" step="0.01">
+          </div>
+          <div class="field">
+            <label for="roomH2">سعر نصف اليوم الثاني (ر.ع)</label>
+            <input id="roomH2" type="number" min="0" step="0.01">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="saveRoomBtn">حفظ الغرفة</button>
+          <button type="button" class="btn" id="cancelRoomBtn">إلغاء</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- نافذة المستخدم (إضافة / تعديل) -->
+  <div class="modal" id="userModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="userModalTitle">إضافة مستخدم جديد</h2>
+        <button class="close-btn" type="button" id="closeUserModalBtn">✕</button>
+      </div>
+
+      <div id="userMessage" class="message"></div>
+
+      <form id="userForm">
+        <div class="form-grid">
+          <div class="field">
+            <label for="userName">ID *</label>
+            <input id="userName" type="text" required maxlength="150" autocomplete="off">
+            <small id="userIdHint" class="hidden">لا يمكن تغيير الـ ID عند التعديل</small>
+          </div>
+          <div class="field">
+            <label for="userUsername"> اسم المستخدم *</label>
+            <input id="userUsername" type="text" required maxlength="150" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="userPassword" id="userPasswordLabel">كلمة المرور *</label>
+            <input id="userPassword" type="password" maxlength="100" autocomplete="new-password">
+            <small id="userPasswordHint" class="hidden">اتركها فارغة للإبقاء على كلمة المرور الحالية</small>
+          </div>
+          <div class="field">
+            <label for="userRole">الصلاحية</label>
+            <select id="userRole">
+              <option value="viewer">viewer</option>
+              <option value="admin">admin</option>
+              <option value="sup_admin">sup_admin</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="saveUserBtn">حفظ المستخدم</button>
+          <button type="button" class="btn" id="cancelUserBtn">إلغاء</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbyhY5DrU7M9OqPUleO7BlOG2n_8UagOu0-UGzjTGPqKsjEXY63az8GHduGjfQc0NpmmKQ/exec";
+
+/*
+  حقل المعرّف الفريد لكل شيت.
+  rooms: name | users: id (أعمدة الشيت: id, email, password, role)
+*/
+const KEY_FIELD = { rooms: "name", users: "id" };
+
+const token = sessionStorage.getItem("token");
+const isAdmin = ["admin", "sup_admin"].includes(
+  (sessionStorage.getItem("role") || "").toLowerCase()
+);
+
+const $ = id => document.getElementById(id);
+
+const state = { rooms: [], users: [] };
+const editing = { rooms: null, users: null }; // مفتاح السجل قيد التعديل
+
+if (!token) {
+  location.replace("index.html");
+}
+
+/* ---------- أدوات مساعدة ---------- */
+
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[c]));
+}
+
+function showMessage(el, text, type) {
+  el.textContent = text;
+  el.className = "message show" + (type ? " " + type : "");
+}
+
+function apiRead(sheet) {
+  return fetch(`${API_URL}?action=read&sheet=${sheet}&token=${encodeURIComponent(token)}`)
+    .then(r => r.json())
+    .then(data => {
+      if (!data.success) throw Error(data.message);
+      return data.rows || [];
+    });
+}
+
+function apiWrite(action, sheet, record, key) {
+  const params = { action, sheet, token };
+  if (record) params.record = JSON.stringify(record);
+  if (key !== undefined) {
+    params.key_field = KEY_FIELD[sheet];
+    params.key = key;
+  }
+  return fetch(API_URL, { method: "POST", body: new URLSearchParams(params) })
+    .then(r => r.json())
+    .then(data => {
+      if (!data.success) throw Error(data.message);
+      return data;
+    });
+}
+
+/* ---------- التبويبات ---------- */
+
+function showTab(tab) {
+  const rooms = tab === "rooms";
+  $("roomsSection").classList.toggle("hidden", !rooms);
+  $("usersSection").classList.toggle("hidden", rooms);
+  $("listTab").classList.toggle("active", rooms);
+  $("usersTab").classList.toggle("active", !rooms);
+  if (!rooms) loadUsers();
+}
+
+$("listTab").addEventListener("click", () => showTab("rooms"));
+$("usersTab").addEventListener("click", () => showTab("users"));
+
+// المستخدمون وأزرار التعديل للمدير فقط
+$("addButton").hidden = !isAdmin;
+$("addUserButton").hidden = !isAdmin;
+if (!isAdmin) {
+  $("usersTab").classList.add("hidden");
+  document.querySelectorAll(".admin-col").forEach(el => el.classList.add("hidden"));
+}
+
+/* ---------- الغرف ---------- */
+
+function loadRooms() {
+  apiRead("rooms")
+    .then(rows => {
+      state.rooms = rows;
+      renderRooms();
+    })
+    .catch(error => {
+      console.error(error);
+      $("roomsBody").innerHTML =
+        `<tr><td colspan="7">تعذر تحميل الغرف: ${esc(error.message)}</td></tr>`;
+    });
+}
+
+function renderRooms() {
+  $("roomsBody").innerHTML =
+    state.rooms.map((room, i) => `
+      <tr>
+        <td>${esc(room.name)}</td>
+        <td>${esc(room.status)}</td>
+        <td>${esc(room.sleep_over)}</td>
+        <td>${esc(room.price_full)}</td>
+        <td>${esc(room.price_h1)}</td>
+        <td>${esc(room.price_h2)}</td>
+        ${isAdmin ? `<td><div class="actions">
+          <button class="btn btn-small" type="button" data-edit-room="${i}">تعديل</button>
+        </div></td>` : ""}
+      </tr>
+    `).join("") ||
+    `<tr><td colspan="7">لا توجد غرف</td></tr>`;
+}
+
+function openRoomModal(index) {
+  $("roomForm").reset();
+  $("formMessage").className = "message";
+  $("formMessage").textContent = "";
+
+  if (index === null) {
+    editing.rooms = null;
+    $("roomModalTitle").textContent = "إضافة غرفة جديدة";
+    $("saveRoomBtn").textContent = "حفظ الغرفة";
+  } else {
+    const room = state.rooms[index];
+    editing.rooms = room[KEY_FIELD.rooms];
+    $("roomModalTitle").textContent = "تعديل الغرفة";
+    $("saveRoomBtn").textContent = "حفظ التعديلات";
+    $("roomName").value = room.name ?? "";
+    $("roomStatus").value = room.status ?? "Open";
+    $("roomSleepOver").value = room.sleep_over ?? "";
+    $("roomFull").value = room.price_full ?? "";
+    $("roomH1").value = room.price_h1 ?? "";
+    $("roomH2").value = room.price_h2 ?? "";
+  }
+  $("roomModal").classList.add("open");
+}
+
+function closeRoomModal() { $("roomModal").classList.remove("open"); }
+
+$("addButton").addEventListener("click", () => openRoomModal(null));
+$("roomsBody").addEventListener("click", e => {
+  const btn = e.target.closest("[data-edit-room]");
+  if (btn && isAdmin) openRoomModal(Number(btn.dataset.editRoom));
+});
+$("closeRoomModalBtn").addEventListener("click", closeRoomModal);
+$("cancelRoomBtn").addEventListener("click", closeRoomModal);
+$("roomModal").addEventListener("click", e => { if (e.target === $("roomModal")) closeRoomModal(); });
+
+$("roomForm").onsubmit = event => {
+  event.preventDefault();
+  if (!isAdmin) return alert("ليس لديك صلاحية");
+
+  const record = {
+    name: $("roomName").value.trim(),
+    status: $("roomStatus").value.trim(),
+    sleep_over: $("roomSleepOver").value,
+    price_full: $("roomFull").value,
+    price_h1: $("roomH1").value,
+    price_h2: $("roomH2").value
+  };
+
+  const isEdit = editing.rooms !== null;
+  showMessage($("formMessage"), "جارٍ الحفظ...");
+  $("saveRoomBtn").disabled = true;
+
+  apiWrite(isEdit ? "update" : "add", "rooms", record, isEdit ? editing.rooms : undefined)
+    .then(() => {
+      closeRoomModal();
+      loadRooms();
+      alert(isEdit ? "تم تعديل الغرفة بنجاح" : "تمت إضافة الغرفة بنجاح");
+    })
+    .catch(error => showMessage($("formMessage"), "تعذر الحفظ: " + error.message, "error"))
+    .finally(() => { $("saveRoomBtn").disabled = false; });
+};
+
+/* ---------- المستخدمون (id, email, password, role) ---------- */
+
+function loadUsers() {
+  if (!isAdmin) return;
+  $("usersBody").innerHTML = `<tr><td colspan="4">جاري تحميل المستخدمين...</td></tr>`;
+  apiRead("users")
+    .then(rows => {
+      state.users = rows;
+      renderUsers();
+    })
+    .catch(error => {
+      console.error(error);
+      $("usersBody").innerHTML =
+        `<tr><td colspan="4">تعذر تحميل المستخدمين: ${esc(error.message)}</td></tr>`;
+    });
+}
+
+function renderUsers() {
+  $("usersBody").innerHTML =
+    state.users.map((user, i) => `
+      <tr>
+        <td>${esc(user.id)}</td>
+        <td>${esc(user.email)}</td>
+        <td>${esc(user.role)}</td>
+        <td><div class="actions">
+          <button class="btn btn-small" type="button" data-edit-user="${i}">تعديل</button>
+          <button class="btn btn-small btn-danger" type="button" data-delete-user="${i}">حذف</button>
+        </div></td>
+      </tr>
+    `).join("") ||
+    `<tr><td colspan="4">لا يوجد مستخدمون</td></tr>`;
+}
+
+function openUserModal(index) {
+  $("userForm").reset();
+  $("userMessage").className = "message";
+  $("userMessage").textContent = "";
+
+  if (index === null) {
+    editing.users = null;
+    $("userModalTitle").textContent = "إضافة مستخدم جديد";
+    $("saveUserBtn").textContent = "حفظ المستخدم";
+    $("userName").readOnly = false;
+    $("userIdHint").classList.add("hidden");
+    $("userPassword").required = true;
+    $("userPasswordLabel").textContent = "كلمة المرور *";
+    $("userPasswordHint").classList.add("hidden");
+  } else {
+    const user = state.users[index];
+    editing.users = user[KEY_FIELD.users];
+    $("userModalTitle").textContent = "تعديل المستخدم";
+    $("saveUserBtn").textContent = "حفظ التعديلات";
+    $("userName").value = user.id ?? "";
+    $("userName").readOnly = true; // الـ ID هو المفتاح، لا يُغيَّر
+    $("userIdHint").classList.remove("hidden");
+    $("userUsername").value = user.email ?? "";
+    $("userRole").value = user.role ?? "viewer";
+    $("userPassword").required = false;
+    $("userPasswordLabel").textContent = "كلمة مرور جديدة";
+    $("userPasswordHint").classList.remove("hidden");
+  }
+  $("userModal").classList.add("open");
+}
+
+function closeUserModal() { $("userModal").classList.remove("open"); }
+
+$("addUserButton").addEventListener("click", () => openUserModal(null));
+$("closeUserModalBtn").addEventListener("click", closeUserModal);
+$("cancelUserBtn").addEventListener("click", closeUserModal);
+$("userModal").addEventListener("click", e => { if (e.target === $("userModal")) closeUserModal(); });
+
+$("usersBody").addEventListener("click", e => {
+  if (!isAdmin) return;
+
+  const editBtn = e.target.closest("[data-edit-user]");
+  if (editBtn) return openUserModal(Number(editBtn.dataset.editUser));
+
+  const delBtn = e.target.closest("[data-delete-user]");
+  if (delBtn) {
+    const user = state.users[Number(delBtn.dataset.deleteUser)];
+    if (!confirm(`هل تريد حذف المستخدم "${user.email || user.id}"؟ لا يمكن التراجع عن هذا الإجراء.`)) return;
+
+    delBtn.disabled = true;
+    apiWrite("delete", "users", null, user[KEY_FIELD.users])
+      .then(() => {
+        loadUsers();
+        alert("تم حذف المستخدم");
+      })
+      .catch(error => {
+        delBtn.disabled = false;
+        alert("تعذر الحذف: " + error.message);
+      });
+  }
+});
+
+$("userForm").onsubmit = event => {
+  event.preventDefault();
+  if (!isAdmin) return alert("ليس لديك صلاحية");
+
+  const record = {
+    id: $("userName").value.trim(),
+    email: $("userUsername").value.trim(),
+    role: $("userRole").value
+  };
+  const password = $("userPassword").value;
+  if (password) record.password = password; // في التعديل: الفارغ = بدون تغيير
+
+  const isEdit = editing.users !== null;
+  showMessage($("userMessage"), "جارٍ الحفظ...");
+  $("saveUserBtn").disabled = true;
+
+  apiWrite(isEdit ? "update" : "add", "users", record, isEdit ? editing.users : undefined)
+    .then(() => {
+      closeUserModal();
+      loadUsers();
+      alert(isEdit ? "تم تعديل المستخدم بنجاح" : "تمت إضافة المستخدم بنجاح");
+    })
+    .catch(error => showMessage($("userMessage"), "تعذر الحفظ: " + error.message, "error"))
+    .finally(() => { $("saveUserBtn").disabled = false; });
+};
+
+/* ---------- Escape يغلق النوافذ ---------- */
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { closeRoomModal(); closeUserModal(); }
+});
+
+if (token) loadRooms();
+</script>
+</body>
+</html>
