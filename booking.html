@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>إدارة حجوزات الاستراحة</title>
-
 <style>
 :root {
   --ink: #0e2433;
@@ -533,7 +532,9 @@ input[type="date"] {
     <button class="btn btn-glass hidden" id="refreshBtn">↻ تحديث البيانات</button>
     <button class="btn btn-accent hidden" id="newBookingBtn">＋ حجز جديد</button>
 <button class="btn btn-glass" type="button"
-  onclick="sessionStorage.clear(); window.close();">خروج</button>
+  onclick="sessionStorage.clear();
+           if (window.AndroidBridge) { AndroidBridge.exitApp(); }
+           else { window.close(); }">خروج</button>
   </div>
 </div>
 
@@ -840,6 +841,8 @@ input[type="date"] {
   </div>
 </div>
 
+
+
 <script>
 /* ==========================================================
    إعداد الاتصال
@@ -886,12 +889,12 @@ if (!token) {
   location.replace("index.html");
  }
 
-function showMessage(id, text, type = "error") {
-  const el = $(id);
-  el.textContent = text;
-  el.className = "message show " + type;
-  el.scrollIntoView({ block: "nearest", behavior: "smooth" });
-}
+// function showMessage(id, text, type = "error") {
+//   const el = $(id);
+//   el.textContent = text;
+//   el.className = "message show " + type;
+//   el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+// }
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, ch => ({
@@ -2151,12 +2154,6 @@ renderCalendar();
 renderExpenses();
 loadData();
 
-webView.setWebChromeClient(new WebChromeClient() {
-    @Override
-    public void onCloseWindow(WebView window) {
-        finishAffinity();
-    }
-});
 
 </script>
 </body>
